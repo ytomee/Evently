@@ -27,29 +27,45 @@ export default function HomePage() {
 
       {/* CTAs */}
       {!loading && (
-        user ? (
-          <Link
-            href="/dashboard"
-            className="px-9 py-3.5 bg-soft text-dark font-semibold text-sm rounded-full transition-all duration-200 hover:bg-light hover:-translate-y-px"
-          >
-            A minha área
-          </Link>
-        ) : (
-          <div className="flex items-center gap-4">
-            <Link
-              href="/register"
-              className="px-9 py-3.5 bg-soft text-dark font-semibold text-sm rounded-full transition-all duration-200 hover:bg-light hover:-translate-y-px"
-            >
-              Criar conta
-            </Link>
-            <Link
-              href="/login"
-              className="px-9 py-3.5 border border-soft/20 text-soft font-medium text-sm rounded-full transition-all duration-200 hover:bg-soft/10"
-            >
-              Entrar
-            </Link>
-          </div>
-        )
+        <div className="flex flex-col items-center gap-4">
+          {user ? (
+            <div className="flex items-center gap-4">
+              <Link
+                href="/dashboard"
+                className="px-9 py-3.5 bg-soft text-dark font-semibold text-sm rounded-full transition-all duration-200 hover:bg-light hover:-translate-y-px"
+              >
+                A minha área
+              </Link>
+              <Link
+                href="/events"
+                className="px-9 py-3.5 border border-soft/20 text-soft font-medium text-sm rounded-full transition-all duration-200 hover:bg-soft/10"
+              >
+                Explorar eventos
+              </Link>
+            </div>
+          ) : (
+            <div className="flex items-center gap-4">
+              <Link
+                href="/events"
+                className="px-9 py-3.5 bg-soft text-dark font-semibold text-sm rounded-full transition-all duration-200 hover:bg-light hover:-translate-y-px"
+              >
+                Explorar eventos
+              </Link>
+              <Link
+                href="/register"
+                className="px-9 py-3.5 border border-soft/20 text-soft font-medium text-sm rounded-full transition-all duration-200 hover:bg-soft/10"
+              >
+                Criar conta
+              </Link>
+              <Link
+                href="/login"
+                className="px-9 py-3.5 border border-soft/20 text-soft font-medium text-sm rounded-full transition-all duration-200 hover:bg-soft/10 hidden sm:block"
+              >
+                Entrar
+              </Link>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Decorative rule */}

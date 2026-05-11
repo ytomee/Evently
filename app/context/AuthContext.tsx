@@ -1,0 +1,88 @@
+"use client";
+
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+
+/* ── Types ─────────────────────────────────────────────────────────────── */
+
+interface User {
+  name: string;
+  email: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  login: (email: string, password: string) => { ok: boolean; error?: string };
+  logout: () => void;
+}
+
+/* ── Keys ──────────────────────────────────────────────────────────────── */
+
+const USERS_KEY = "evently_users";
+const SESSION_KEY = "evently_session";
+
+/* ── Context ───────────────────────────────────────────────────────────── */
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  /* Restore session on mount */
+  useEffect(() => {
+    try {
+      const session = localStorage.getItem(SESSION_KEY);
+      if (session) {
+        setUser(JSON.parse(session));
+      }
+    } catch {
+      localStorage.removeItem(SESSION_KEY);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /* Login */
+  const login = useCallback((email: string, password: string) => {
+    try {
+      const raw = localStorage.getItem(USERS_KEY);
+      const users: { name: string; email: string; password: string }[] = raw
+        ? JSON.parse(raw)
+        : [];
+
+      const match = users.find(
+        (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+      );
+
+      if (!match) {
+        return { ok: false, error: "Email ou palavra-passe incorretos." };
+      }
+
+      const sessionUser: User = { name: match.name, email: match.email };
+      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
+      setUser(sessionUser);
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "Erro ao iniciar sessão. Tenta novamente." };
+    }
+  }, []);
+
+  /* Logout */
+  const logout = useCallback(() => {
+    localStorage.removeItem(SESSION_KEY);
+    setUser(null);
+  }, []);
+
+  return (
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
+}

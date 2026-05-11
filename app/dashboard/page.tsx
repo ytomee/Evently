@@ -289,15 +289,23 @@ export default function DashboardPage() {
                         {fmtBadge.icon} {fmtBadge.label}
                       </span>
 
-                      {/* Edit link */}
-                      {!isCancelled && (
+                      {/* View & Edit links */}
+                      <div className="flex items-center gap-2 mt-1">
                         <Link
-                          href={`/dashboard/edit/${event.id}`}
-                          className="px-3 py-1.5 mt-1 text-xs font-medium rounded-full border border-soft/20 text-soft hover:bg-soft/10 transition-colors"
+                          href={`/events/${event.id}`}
+                          className="px-3 py-1.5 text-xs font-medium rounded-full border border-soft/20 text-soft hover:bg-soft/10 transition-colors"
                         >
-                          ✏️ Editar
+                          👁️ Ver página
                         </Link>
-                      )}
+                        {!isCancelled && (
+                          <Link
+                            href={`/dashboard/edit/${event.id}`}
+                            className="px-3 py-1.5 text-xs font-medium rounded-full border border-soft/20 text-soft hover:bg-soft/10 transition-colors"
+                          >
+                            ✏️ Editar
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   </div>
 

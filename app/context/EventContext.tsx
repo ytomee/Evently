@@ -19,6 +19,7 @@ interface EventContextType {
   events: Event[];
   userEvents: Event[];
   createEvent: (data: CreateEventInput) => { ok: boolean; error?: string };
+  updateEvent: (id: string, data: Partial<CreateEventInput>) => { ok: boolean; error?: string };
 }
 
 /* ── Key ───────────────────────────────────────────────────────────────── */
@@ -71,8 +72,42 @@ export function EventProvider({ children }: { children: ReactNode }) {
     [user]
   );
 
+  /* Update event */
+  const updateEvent = useCallback(
+    (id: string, data: Partial<CreateEventInput>) => {
+      if (!user) return { ok: false, error: "Tens de iniciar sessão." };
+
+      let updatedEvent: Event | undefined;
+
+      setEvents((prev) => {
+        const index = prev.findIndex((e) => e.id === id);
+        if (index === -1) return prev;
+
+        const event = prev[index];
+        // Verifica se o utilizador é o organizador
+        if (event.organizerEmail !== user.email) {
+          return prev;
+        }
+
+        updatedEvent = { ...event, ...data };
+        const updated = [...prev];
+        updated[index] = updatedEvent;
+        
+        localStorage.setItem(EVENTS_KEY, JSON.stringify(updated));
+        return updated;
+      });
+
+      if (!updatedEvent) {
+        return { ok: false, error: "Evento não encontrado ou sem permissão para editar." };
+      }
+
+      return { ok: true };
+    },
+    [user]
+  );
+
   return (
-    <EventContext.Provider value={{ events, userEvents, createEvent }}>
+    <EventContext.Provider value={{ events, userEvents, createEvent, updateEvent }}>
       {children}
     </EventContext.Provider>
   );

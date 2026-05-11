@@ -143,9 +143,17 @@ export default function DashboardPage() {
                         <span>📍 {event.location}</span>
                       </div>
                     </div>
-                    <span className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-soft/10 border border-soft/20 text-xs font-medium text-soft">
-                      {badge.icon} {badge.label}
-                    </span>
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-soft/10 border border-soft/20 text-xs font-medium text-soft">
+                        {badge.icon} {badge.label}
+                      </span>
+                      <Link
+                        href={`/dashboard/edit/${event.id}`}
+                        className="px-3 py-1.5 mt-2 text-xs font-medium rounded-full border border-soft/20 text-soft hover:bg-soft/10 transition-colors"
+                      >
+                        ✏️ Editar
+                      </Link>
+                    </div>
                   </div>
                 </div>
               );

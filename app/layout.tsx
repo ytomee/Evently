@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
+import { EventProvider } from "./context/EventContext";
 
 export const metadata: Metadata = {
   title: "Evently",
@@ -13,7 +14,9 @@ export default function RootLayout({
   return (
     <html lang="pt" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-neutral-900 text-light">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <EventProvider>{children}</EventProvider>
+        </AuthProvider>
       </body>
     </html>
   );

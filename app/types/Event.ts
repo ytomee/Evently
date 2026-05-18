@@ -42,4 +42,5 @@ export interface Event {
   organizerEmail: string;
   agenda?: AgendaItem[];
   createdAt: string;      // ISO string
+  checkIns?: { userEmail: string; timestamp: string }[];
 }

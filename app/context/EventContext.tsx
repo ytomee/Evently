@@ -25,6 +25,7 @@ interface EventContextType {
   updateEvent: (id: string, data: Partial<CreateEventInput>) => { ok: boolean; error?: string };
   updateEventStatus: (id: string, status: EventStatus) => { ok: boolean; error?: string };
   createSpeaker: (data: Omit<Speaker, "id" | "organizerEmail">) => { ok: boolean; error?: string };
+  checkInParticipant: (eventId: string, userEmail: string) => { ok: boolean; error?: string };
 }
 
 /* ── Valid status transitions ──────────────────────────────────────────── */
@@ -191,8 +192,40 @@ export function EventProvider({ children }: { children: ReactNode }) {
     [user, events]
   );
 
+  const checkInParticipant = useCallback((eventId: string, userEmail: string) => {
+    if (!user) return { ok: false, error: "Tens de iniciar sessão." };
+
+    let updatedEvent: Event | undefined;
+
+    setEvents((prev) => {
+      const index = prev.findIndex((e) => e.id === eventId);
+      if (index === -1) return prev;
+
+      const event = prev[index];
+      if (event.organizerEmail !== user.email) return prev;
+
+      if (event.checkIns?.some((c) => c.userEmail === userEmail)) return prev;
+
+      const newCheckIn = { userEmail, timestamp: new Date().toISOString() };
+      updatedEvent = { 
+        ...event, 
+        checkIns: [...(event.checkIns || []), newCheckIn] 
+      };
+
+      const updated = [...prev];
+      updated[index] = updatedEvent;
+
+      localStorage.setItem(EVENTS_KEY, JSON.stringify(updated));
+      return updated;
+    });
+
+    if (!updatedEvent) return { ok: false, error: "Erro ao fazer check-in." };
+
+    return { ok: true };
+  }, [user]);
+
   return (
-    <EventContext.Provider value={{ events, userEvents, speakers, userSpeakers, createEvent, updateEvent, updateEventStatus, createSpeaker }}>
+    <EventContext.Provider value={{ events, userEvents, speakers, userSpeakers, createEvent, updateEvent, updateEventStatus, createSpeaker, checkInParticipant }}>
       {children}
     </EventContext.Provider>
   );

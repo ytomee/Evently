@@ -375,8 +375,8 @@ export default function DashboardPage() {
                         {fmtBadge.icon} {fmtBadge.label}
                       </span>
 
-                      {/* View & Edit links */}
-                      <div className="flex items-center gap-2 mt-1">
+                      {/* View, Edit & Check-in links */}
+                      <div className="flex flex-wrap items-center gap-2 mt-1 justify-end">
                         <Link
                           href={`/events/${event.id}`}
                           className="px-3 py-1.5 text-xs font-medium rounded-full border border-soft/20 text-soft hover:bg-soft/10 transition-colors"
@@ -389,6 +389,14 @@ export default function DashboardPage() {
                             className="px-3 py-1.5 text-xs font-medium rounded-full border border-soft/20 text-soft hover:bg-soft/10 transition-colors"
                           >
                             ✏️ Editar
+                          </Link>
+                        )}
+                        {!isCancelled && (
+                          <Link
+                            href={`/dashboard/checkin/${event.id}`}
+                            className="px-3 py-1.5 text-xs font-medium rounded-full border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                          >
+                            📝 Check-in
                           </Link>
                         )}
                       </div>

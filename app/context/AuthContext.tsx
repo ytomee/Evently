@@ -31,6 +31,7 @@ interface AuthContextType {
   login: (email: string, password: string) => { ok: boolean; error?: string };
   logout: () => void;
   updateUser: (data: Partial<User>) => void;
+  getRegisteredUsersForEvent: (eventId: string) => User[];
 }
 
 /* ── Keys ──────────────────────────────────────────────────────────────── */
@@ -117,8 +118,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const getRegisteredUsersForEvent = useCallback((eventId: string) => {
+    try {
+      const raw = localStorage.getItem(USERS_KEY);
+      if (!raw) return [];
+      const users: User[] = JSON.parse(raw);
+      return users.filter((u) => u.registeredEvents?.includes(eventId));
+    } catch {
+      return [];
+    }
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, updateUser, getRegisteredUsersForEvent }}>
       {children}
     </AuthContext.Provider>
   );

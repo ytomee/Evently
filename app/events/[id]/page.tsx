@@ -187,13 +187,13 @@ export default function EventDetailsPage() {
                               </p>
                             )}
                             {speaker && (
-                              <div className="mt-3 inline-flex items-center gap-3 px-3 py-2 rounded-lg bg-soft/[0.05] border border-soft/[0.1] self-start">
-                                <span className="text-xl">👤</span>
+                              <Link href={`/speakers/${speaker.id}`} className="mt-3 inline-flex items-center gap-3 px-3 py-2 rounded-lg bg-soft/[0.05] border border-soft/[0.1] self-start hover:bg-soft/[0.1] hover:border-soft/30 transition-all group">
+                                <span className="text-xl group-hover:scale-110 transition-transform">👤</span>
                                 <div className="flex flex-col">
-                                  <span className="text-xs font-semibold text-light leading-none mb-1">{speaker.name}</span>
+                                  <span className="text-xs font-semibold text-light leading-none mb-1 group-hover:text-soft transition-colors">{speaker.name}</span>
                                   <span className="text-[10px] text-muted leading-none">{speaker.role} na {speaker.company}</span>
                                 </div>
-                              </div>
+                              </Link>
                             )}
                           </div>
                         </div>

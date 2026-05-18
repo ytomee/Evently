@@ -73,7 +73,7 @@ function formatDate(iso: string) {
 /* ── Page ──────────────────────────────────────────────────────────────── */
 
 export default function DashboardPage() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, updateUser } = useAuth();
   const { events, userEvents, updateEventStatus } = useEvents();
   const router = useRouter();
 
@@ -229,6 +229,106 @@ export default function DashboardPage() {
               })}
             </div>
           )}
+        </div>
+
+        {/* --- A minha agenda (Favoritos) --- */}
+        <div>
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold tracking-tight text-light mb-1">
+              ⭐ A minha agenda
+            </h2>
+            <p className="text-sm text-muted">
+              Sessões que marcaste como favoritas nos eventos.
+            </p>
+          </div>
+
+          {(() => {
+            const favs = user.favoriteSessions || [];
+            if (favs.length === 0) {
+              return (
+                <div className="py-12 text-center rounded-2xl border border-dashed border-soft/20 bg-white/[0.01]">
+                  <p className="text-muted text-sm">Ainda não adicionaste sessões aos favoritos.</p>
+                  <p className="text-muted/60 text-xs mt-2">Marca sessões com ⭐ na agenda de um evento.</p>
+                </div>
+              );
+            }
+
+            // Group favorites by event
+            const grouped: Record<string, { eventId: string; sessionId: string }[]> = {};
+            for (const fav of favs) {
+              if (!grouped[fav.eventId]) grouped[fav.eventId] = [];
+              grouped[fav.eventId].push(fav);
+            }
+
+            return (
+              <div className="flex flex-col gap-6">
+                {Object.entries(grouped).map(([eventId, sessionFavs]) => {
+                  const ev = events.find((e) => e.id === eventId);
+                  if (!ev) return null;
+
+                  const favSessions = sessionFavs
+                    .map((f) => ev.agenda?.find((a) => a.id === f.sessionId))
+                    .filter(Boolean)
+                    .sort((a, b) => {
+                      if (a!.date !== b!.date) return (a!.date || "").localeCompare(b!.date || "");
+                      return a!.startTime.localeCompare(b!.startTime);
+                    });
+
+                  if (favSessions.length === 0) return null;
+
+                  return (
+                    <div key={eventId} className="rounded-2xl border border-amber-500/[0.12] bg-amber-500/[0.02] overflow-hidden">
+                      <Link
+                        href={`/events/${eventId}`}
+                        className="flex items-center justify-between px-5 py-3 border-b border-amber-500/[0.1] hover:bg-amber-500/[0.04] transition-colors"
+                      >
+                        <h3 className="text-sm font-semibold text-light">{ev.title}</h3>
+                        <span className="text-xs text-amber-400 font-medium">{favSessions.length} sessão(ões) →</span>
+                      </Link>
+                      <div className="divide-y divide-soft/[0.06]">
+                        {favSessions.map((session) => {
+                          if (!session) return null;
+                          const removeFav = () => {
+                            updateUser({
+                              favoriteSessions: favs.filter(
+                                (f) => !(f.eventId === eventId && f.sessionId === session.id)
+                              ),
+                            });
+                          };
+
+                          return (
+                            <div key={session.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-white/[0.02] transition-colors">
+                              <div className="flex items-center gap-4 min-w-0">
+                                <div className="flex flex-col items-center shrink-0 min-w-[3.5rem]">
+                                  <span className="text-amber-400 font-mono text-xs font-medium">{session.startTime}</span>
+                                  <span className="text-muted/40 text-[8px] uppercase font-bold">—</span>
+                                  <span className="text-muted font-mono text-[10px]">{session.endTime}</span>
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium text-light truncate">{session.title}</p>
+                                  {session.date && (
+                                    <p className="text-[10px] text-muted mt-0.5">📅 {session.date}</p>
+                                  )}
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={removeFav}
+                                className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30 transition-all cursor-pointer text-xs"
+                                title="Remover dos favoritos"
+                              >
+                                ★
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </div>
 
         {/* --- Os meus eventos (Organizados) --- */}

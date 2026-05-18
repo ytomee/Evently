@@ -23,6 +23,7 @@ interface User {
   };
   registeredEvents?: string[];
   communications?: Communication[];
+  favoriteSessions?: { eventId: string; sessionId: string }[];
 }
 
 interface AuthContextType {

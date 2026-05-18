@@ -230,6 +230,29 @@ export default function EventDetailsPage() {
                     <div className="flex flex-col gap-4">
                       {items!.map((item, idx) => {
                         const speaker = speakers.find(s => s.id === item.speakerId);
+                        const isFav = user?.favoriteSessions?.some(
+                          (f) => f.eventId === event.id && f.sessionId === item.id
+                        ) ?? false;
+
+                        const toggleFav = () => {
+                          if (!user) {
+                            router.push("/login");
+                            return;
+                          }
+                          const current = user.favoriteSessions || [];
+                          if (isFav) {
+                            updateUser({
+                              favoriteSessions: current.filter(
+                                (f) => !(f.eventId === event.id && f.sessionId === item.id)
+                              ),
+                            });
+                          } else {
+                            updateUser({
+                              favoriteSessions: [...current, { eventId: event.id, sessionId: item.id }],
+                            });
+                          }
+                        };
+
                         return (
                         <div key={item.id || idx} className="flex gap-5 p-5 rounded-xl bg-white/[0.02] border border-soft/[0.08] hover:border-soft/20 transition-colors">
                           <div className="flex flex-col items-center justify-start shrink-0 min-w-[4rem] pt-0.5">
@@ -238,7 +261,21 @@ export default function EventDetailsPage() {
                             <span className="text-muted font-mono text-xs">{item.endTime}</span>
                           </div>
                           <div className="flex flex-col gap-1 w-full border-l border-soft/[0.08] pl-5">
-                            <h4 className="text-light font-semibold text-base">{item.title}</h4>
+                            <div className="flex items-start justify-between gap-2">
+                              <h4 className="text-light font-semibold text-base">{item.title}</h4>
+                              <button
+                                type="button"
+                                onClick={toggleFav}
+                                className={`shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 cursor-pointer ${
+                                  isFav
+                                    ? "bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30"
+                                    : "bg-white/[0.03] text-muted/50 border border-soft/10 hover:text-amber-400 hover:border-amber-500/30 hover:bg-amber-500/10"
+                                }`}
+                                title={isFav ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                              >
+                                {isFav ? "★" : "☆"}
+                              </button>
+                            </div>
                             {item.description && (
                               <p className="text-sm text-muted/80 leading-relaxed whitespace-pre-wrap mt-1">
                                 {item.description}

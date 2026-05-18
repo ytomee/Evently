@@ -9,6 +9,10 @@ interface User {
   email: string;
   contact?: string;
   bio?: string;
+  preferences?: {
+    themes: string[];
+    types: string[];
+  };
 }
 
 interface AuthContextType {

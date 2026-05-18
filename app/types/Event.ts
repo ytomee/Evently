@@ -1,5 +1,8 @@
 export type EventStatus = "planeado" | "ativo" | "concluido" | "cancelado";
 
+export const EVENT_THEMES = ["Tecnologia", "Arte", "Desporto", "Música", "Negócios", "Saúde", "Educação"];
+export const EVENT_TYPES = ["Conferência", "Workshop", "Meetup", "Webinar", "Festival", "Networking"];
+
 export interface AgendaItem {
   time: string;
   title: string;
@@ -12,6 +15,8 @@ export interface Event {
   date: string;           // ISO string (datetime-local)
   location: string;
   format: "online" | "presencial" | "hibrido";
+  theme?: string;
+  type?: string;
   status: EventStatus;
   organizerEmail: string;
   agenda?: AgendaItem[];

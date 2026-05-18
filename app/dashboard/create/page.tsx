@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
 import { useEvents } from "../../context/EventContext";
+import { EVENT_THEMES, EVENT_TYPES } from "../../types/Event";
 
 type Format = "online" | "presencial" | "hibrido";
 
@@ -24,6 +25,8 @@ export default function CreateEventPage() {
   const [date, setDate] = useState("");
   const [location, setLocation] = useState("");
   const [format, setFormat] = useState<Format>("presencial");
+  const [theme, setTheme] = useState("");
+  const [type, setType] = useState("");
   const [error, setError] = useState("");
 
   /* Redirect if not authenticated */
@@ -68,6 +71,8 @@ export default function CreateEventPage() {
       date,
       location: location.trim(),
       format,
+      theme: theme || undefined,
+      type: type || undefined,
     });
 
     if (!result.ok) {
@@ -179,8 +184,45 @@ export default function CreateEventPage() {
               />
             </div>
 
+            {/* Theme & Type Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="event-theme" className="text-xs font-medium text-muted tracking-wide">
+                  Tema
+                </label>
+                <select
+                  id="event-theme"
+                  value={theme}
+                  onChange={(e) => setTheme(e.target.value)}
+                  className="w-full px-4 py-3 bg-white/[0.04] border border-soft/[0.15] rounded-xl text-light text-sm outline-none focus:border-soft/50 transition-colors duration-200"
+                >
+                  <option value="" className="text-black">Selecionar...</option>
+                  {EVENT_THEMES.map((t) => (
+                    <option key={t} value={t} className="text-black">{t}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="event-type" className="text-xs font-medium text-muted tracking-wide">
+                  Tipo de Evento
+                </label>
+                <select
+                  id="event-type"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                  className="w-full px-4 py-3 bg-white/[0.04] border border-soft/[0.15] rounded-xl text-light text-sm outline-none focus:border-soft/50 transition-colors duration-200"
+                >
+                  <option value="" className="text-black">Selecionar...</option>
+                  {EVENT_TYPES.map((t) => (
+                    <option key={t} value={t} className="text-black">{t}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             {/* Format */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 mt-2">
               <span className="text-xs font-medium text-muted tracking-wide">
                 Formato *
               </span>
@@ -207,7 +249,7 @@ export default function CreateEventPage() {
             <button
               id="create-event-btn"
               type="submit"
-              className="mt-2 w-full py-3.5 bg-soft text-dark font-semibold text-sm rounded-full transition-all duration-200 hover:bg-light hover:-translate-y-px cursor-pointer"
+              className="mt-4 w-full py-3.5 bg-soft text-dark font-semibold text-sm rounded-full transition-all duration-200 hover:bg-light hover:-translate-y-px cursor-pointer"
             >
               Criar evento
             </button>

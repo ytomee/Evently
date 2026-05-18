@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEvents } from "../context/EventContext";
+import { useAuth } from "../context/AuthContext";
 
 const FORMAT_BADGE: Record<string, { label: string; icon: string }> = {
   presencial: { label: "Presencial", icon: "📍" },
@@ -33,9 +34,27 @@ function formatDate(iso: string) {
 
 export default function EventsListPage() {
   const { events } = useEvents();
+  const { user } = useAuth();
 
-  // Sort events by date descending
-  const sortedEvents = [...events].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const userThemes = user?.preferences?.themes || [];
+  const userTypes = user?.preferences?.types || [];
+
+  const getRelevanceScore = (event: any) => {
+    let score = 0;
+    if (event.theme && userThemes.includes(event.theme)) score += 1;
+    if (event.type && userTypes.includes(event.type)) score += 1;
+    return score;
+  };
+
+  // Sort events by relevance score (desc) then by date descending
+  const sortedEvents = [...events].sort((a, b) => {
+    const scoreA = getRelevanceScore(a);
+    const scoreB = getRelevanceScore(b);
+    if (scoreA !== scoreB) {
+      return scoreB - scoreA;
+    }
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -84,18 +103,26 @@ export default function EventsListPage() {
             {sortedEvents.map((event) => {
               const formatBadge = FORMAT_BADGE[event.format] ?? { label: event.format, icon: "📌" };
               const statusBadge = STATUS_BADGE[event.status] ?? { label: event.status, class: "bg-soft/10 text-soft border-soft/20" };
+              const isRecommended = getRelevanceScore(event) > 0;
 
               return (
                 <Link
                   href={`/events/${event.id}`}
                   key={event.id}
-                  className="block group bg-white/[0.03] border border-soft/[0.12] rounded-2xl p-5 sm:p-6 backdrop-blur-md transition-all duration-200 hover:border-soft/30 hover:bg-white/[0.05]"
+                  className={`block group border rounded-2xl p-5 sm:p-6 backdrop-blur-md transition-all duration-200 hover:border-soft/30 hover:bg-white/[0.05] ${isRecommended ? 'bg-amber-500/[0.05] border-amber-500/30' : 'bg-white/[0.03] border-soft/[0.12]'}`}
                 >
                   <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-light mb-1 truncate group-hover:text-soft transition-colors">
-                        {event.title}
-                      </h3>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-lg font-semibold text-light truncate group-hover:text-soft transition-colors">
+                          {event.title}
+                        </h3>
+                        {isRecommended && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                            ★ Recomendado
+                          </span>
+                        )}
+                      </div>
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted mt-2">
                         <span className="flex items-center gap-1">
                           <span>📅</span> {formatDate(event.date)}
@@ -103,6 +130,16 @@ export default function EventsListPage() {
                         <span className="flex items-center gap-1">
                           <span>{formatBadge.icon}</span> {formatBadge.label}
                         </span>
+                        {event.theme && (
+                          <span className="flex items-center gap-1">
+                            <span>🎭</span> {event.theme}
+                          </span>
+                        )}
+                        {event.type && (
+                          <span className="flex items-center gap-1">
+                            <span>🏷️</span> {event.type}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="shrink-0">

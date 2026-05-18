@@ -46,6 +46,7 @@ export default function EventDetailsPage() {
   
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   useEffect(() => {
     // Wait for context to load events from localStorage
@@ -95,7 +96,22 @@ export default function EventDetailsPage() {
     if (isRegistered) return;
 
     const updatedEvents = [...(user.registeredEvents || []), event.id];
-    updateUser({ registeredEvents: updatedEvents });
+    
+    const newComm = {
+      id: crypto.randomUUID(),
+      title: "Confirmação de Inscrição",
+      message: `A tua inscrição no evento "${event.title}" agendado para ${formatDate(event.date)} foi confirmada com sucesso!`,
+      date: new Date().toISOString(),
+      read: false
+    };
+    const updatedComms = [newComm, ...(user.communications || [])];
+
+    updateUser({ 
+      registeredEvents: updatedEvents,
+      communications: updatedComms
+    });
+    
+    setShowConfirmation(true);
   };
 
   const sortedAgenda = [...(event.agenda || [])].sort((a, b) => {
@@ -133,7 +149,34 @@ export default function EventDetailsPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative">
+      {/* Confirmation Modal */}
+      {showConfirmation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-neutral-900 border border-soft/20 rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative">
+            <button 
+              onClick={() => setShowConfirmation(false)}
+              className="absolute top-4 right-4 text-muted hover:text-light transition-colors text-xl"
+            >
+              ✕
+            </button>
+            <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-3xl mb-5 mx-auto">
+              ✔
+            </div>
+            <h2 className="text-xl font-bold text-center text-light mb-2">Inscrição Confirmada!</h2>
+            <p className="text-center text-muted/80 text-sm mb-8 leading-relaxed">
+              Estás registado no evento <strong className="text-light">{event.title}</strong> para o dia <strong className="text-light">{formatDate(event.date)}</strong>.
+            </p>
+            <button 
+              onClick={() => setShowConfirmation(false)}
+              className="w-full py-3.5 bg-soft text-dark font-bold rounded-xl hover:bg-light transition-colors"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Navbar */}
       <nav className="flex items-center justify-between px-6 sm:px-10 py-5 border-b border-soft/[0.08]">
         <Link href="/" className="text-xs font-medium tracking-[0.2em] uppercase text-muted hover:text-soft transition-colors duration-200">

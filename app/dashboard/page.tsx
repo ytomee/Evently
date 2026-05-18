@@ -141,6 +141,15 @@ export default function DashboardPage() {
         </span>
         <div className="flex items-center gap-3 sm:gap-5">
           <Link
+            href="/dashboard/communications"
+            className="relative text-sm text-muted hover:text-soft transition-colors duration-200 hidden sm:block mr-2"
+          >
+            📬 Histórico
+            {user.communications?.some(c => !c.read) && (
+              <span className="absolute -top-1 -right-2 w-2 h-2 rounded-full bg-soft"></span>
+            )}
+          </Link>
+          <Link
             href="/profile"
             className="text-sm text-muted hover:text-soft transition-colors duration-200 hidden sm:block"
           >

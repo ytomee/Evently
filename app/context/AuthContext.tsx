@@ -4,6 +4,14 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
+export interface Communication {
+  id: string;
+  title: string;
+  message: string;
+  date: string;
+  read: boolean;
+}
+
 interface User {
   name: string;
   email: string;
@@ -14,6 +22,7 @@ interface User {
     types: string[];
   };
   registeredEvents?: string[];
+  communications?: Communication[];
 }
 
 interface AuthContextType {

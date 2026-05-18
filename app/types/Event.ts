@@ -8,13 +8,15 @@ export interface Speaker {
   name: string;
   role: string;
   company: string;
+  bio?: string;
+  organizerEmail?: string;
 }
 
 export const MOCK_SPEAKERS: Speaker[] = [
-  { id: "spk-1", name: "João Silva", role: "Software Engineer", company: "TechCorp" },
-  { id: "spk-2", name: "Maria Santos", role: "Product Manager", company: "InovaTech" },
-  { id: "spk-3", name: "Rui Costa", role: "Designer", company: "Criativa" },
-  { id: "spk-4", name: "Ana Pereira", role: "CTO", company: "FutureLabs" },
+  { id: "spk-1", name: "João Silva", role: "Software Engineer", company: "TechCorp", bio: "Especialista em desenvolvimento de software com 10 anos de experiência." },
+  { id: "spk-2", name: "Maria Santos", role: "Product Manager", company: "InovaTech", bio: "Focada na inovação tecnológica e estratégia de produto." },
+  { id: "spk-3", name: "Rui Costa", role: "Designer", company: "Criativa", bio: "Especialista em UX/UI e design centrado no utilizador." },
+  { id: "spk-4", name: "Ana Pereira", role: "CTO", company: "FutureLabs", bio: "Líder técnica apaixonada por arquitetura de sistemas escaláveis." },
 ];
 
 export interface AgendaItem {

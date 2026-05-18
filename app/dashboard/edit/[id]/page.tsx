@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { useEvents } from "../../../context/EventContext";
-import { EVENT_THEMES, EVENT_TYPES, MOCK_SPEAKERS } from "../../../types/Event";
+import { EVENT_THEMES, EVENT_TYPES } from "../../../types/Event";
 import type { AgendaItem } from "../../../types/Event";
 
 type Format = "online" | "presencial" | "hibrido";
@@ -21,7 +21,7 @@ export default function EditEventPage() {
   const params = useParams();
   const eventId = params.id as string;
   const { user, loading: authLoading } = useAuth();
-  const { events, updateEvent } = useEvents();
+  const { events, updateEvent, speakers } = useEvents();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -394,7 +394,7 @@ export default function EditEventPage() {
                             className="w-full px-3 py-2 bg-white/[0.04] border border-soft/[0.15] rounded-lg text-light text-sm outline-none focus:border-soft/50 transition-colors"
                           >
                             <option value="" className="text-black">Nenhum orador</option>
-                            {MOCK_SPEAKERS.map((spk) => (
+                            {speakers.map((spk) => (
                               <option key={spk.id} value={spk.id} className="text-black">
                                 {spk.name} ({spk.role})
                               </option>

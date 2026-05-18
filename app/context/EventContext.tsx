@@ -9,7 +9,8 @@ import {
   type ReactNode,
 } from "react";
 import { useAuth } from "./AuthContext";
-import type { Event, EventStatus } from "../types/Event";
+import type { Event, EventStatus, Speaker } from "../types/Event";
+import { MOCK_SPEAKERS } from "../types/Event";
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -18,9 +19,12 @@ type CreateEventInput = Omit<Event, "id" | "organizerEmail" | "createdAt" | "sta
 interface EventContextType {
   events: Event[];
   userEvents: Event[];
+  speakers: Speaker[];
+  userSpeakers: Speaker[];
   createEvent: (data: CreateEventInput) => { ok: boolean; error?: string };
   updateEvent: (id: string, data: Partial<CreateEventInput>) => { ok: boolean; error?: string };
   updateEventStatus: (id: string, status: EventStatus) => { ok: boolean; error?: string };
+  createSpeaker: (data: Omit<Speaker, "id" | "organizerEmail">) => { ok: boolean; error?: string };
 }
 
 /* ── Valid status transitions ──────────────────────────────────────────── */
@@ -35,6 +39,7 @@ const VALID_TRANSITIONS: Record<EventStatus, EventStatus[]> = {
 /* ── Key ───────────────────────────────────────────────────────────────── */
 
 const EVENTS_KEY = "evently_events";
+const SPEAKERS_KEY = "evently_speakers";
 
 /* ── Context ───────────────────────────────────────────────────────────── */
 
@@ -43,6 +48,7 @@ const EventContext = createContext<EventContextType | undefined>(undefined);
 export function EventProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
+  const [speakers, setSpeakers] = useState<Speaker[]>(MOCK_SPEAKERS);
 
   /* Load events from localStorage on mount */
   useEffect(() => {
@@ -50,15 +56,26 @@ export function EventProvider({ children }: { children: ReactNode }) {
       const raw = localStorage.getItem(EVENTS_KEY);
       if (raw) {
         const parsed: Event[] = JSON.parse(raw);
-        // Migrate old events without status
         const migrated = parsed.map((e) => ({
           ...e,
           status: e.status ?? "planeado",
         })) as Event[];
         setEvents(migrated);
       }
+      
+      const rawSpeakers = localStorage.getItem(SPEAKERS_KEY);
+      if (rawSpeakers) {
+        const parsedSpeakers: Speaker[] = JSON.parse(rawSpeakers);
+        const allSpeakers = [...MOCK_SPEAKERS];
+        for (const s of parsedSpeakers) {
+          if (!allSpeakers.find(m => m.id === s.id)) {
+            allSpeakers.push(s);
+          }
+        }
+        setSpeakers(allSpeakers);
+      }
     } catch {
-      console.error("Failed to load events from storage");
+      console.error("Failed to load data from storage");
     }
   }, []);
 
@@ -66,6 +83,26 @@ export function EventProvider({ children }: { children: ReactNode }) {
   const userEvents = events
     .filter((e) => user && e.organizerEmail === user.email)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const userSpeakers = speakers.filter((s) => user && s.organizerEmail === user.email);
+
+  const createSpeaker = useCallback((data: Omit<Speaker, "id" | "organizerEmail">) => {
+    if (!user) return { ok: false, error: "Tens de iniciar sessão." };
+
+    const newSpeaker: Speaker = {
+      ...data,
+      id: crypto.randomUUID(),
+      organizerEmail: user.email,
+    };
+
+    setSpeakers((prev) => {
+      const updated = [...prev, newSpeaker];
+      localStorage.setItem(SPEAKERS_KEY, JSON.stringify(updated.filter(s => s.organizerEmail)));
+      return updated;
+    });
+
+    return { ok: true };
+  }, [user]);
 
   /* Create event — always starts as "planeado" */
   const createEvent = useCallback(
@@ -155,7 +192,7 @@ export function EventProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <EventContext.Provider value={{ events, userEvents, createEvent, updateEvent, updateEventStatus }}>
+    <EventContext.Provider value={{ events, userEvents, speakers, userSpeakers, createEvent, updateEvent, updateEventStatus, createSpeaker }}>
       {children}
     </EventContext.Provider>
   );

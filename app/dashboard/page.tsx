@@ -165,13 +165,21 @@ export default function DashboardPage() {
               Gere e acompanha os eventos que criaste.
             </p>
           </div>
-          <Link
-            id="new-event-btn"
-            href="/dashboard/create"
-            className="px-6 py-2.5 bg-soft text-dark font-semibold text-sm rounded-full transition-all duration-200 hover:bg-light hover:-translate-y-px whitespace-nowrap"
-          >
-            + Criar evento
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard/speakers"
+              className="px-6 py-2.5 bg-white/[0.04] border border-soft/[0.15] text-light font-semibold text-sm rounded-full transition-all duration-200 hover:bg-white/[0.08]"
+            >
+              👤 Meus oradores
+            </Link>
+            <Link
+              id="new-event-btn"
+              href="/dashboard/create"
+              className="px-6 py-2.5 bg-soft text-dark font-semibold text-sm rounded-full transition-all duration-200 hover:bg-light hover:-translate-y-px whitespace-nowrap"
+            >
+              + Criar evento
+            </Link>
+          </div>
         </div>
 
         {/* Events list */}

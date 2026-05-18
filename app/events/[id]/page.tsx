@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEvents } from "../../context/EventContext";
+import { MOCK_SPEAKERS } from "../../types/Event";
 import type { Event, EventStatus } from "../../types/Event";
 
 const FORMAT_BADGE: Record<string, { label: string; icon: string }> = {
@@ -170,7 +171,9 @@ export default function EventDetailsPage() {
                       {formatGroupDate(dateStr)}
                     </h3>
                     <div className="flex flex-col gap-4">
-                      {items!.map((item, idx) => (
+                      {items!.map((item, idx) => {
+                        const speaker = MOCK_SPEAKERS.find(s => s.id === item.speakerId);
+                        return (
                         <div key={item.id || idx} className="flex gap-5 p-5 rounded-xl bg-white/[0.02] border border-soft/[0.08] hover:border-soft/20 transition-colors">
                           <div className="flex flex-col items-center justify-start shrink-0 min-w-[4rem] pt-0.5">
                             <span className="text-soft font-mono text-sm font-medium">{item.startTime}</span>
@@ -184,9 +187,18 @@ export default function EventDetailsPage() {
                                 {item.description}
                               </p>
                             )}
+                            {speaker && (
+                              <div className="mt-3 inline-flex items-center gap-3 px-3 py-2 rounded-lg bg-soft/[0.05] border border-soft/[0.1] self-start">
+                                <span className="text-xl">👤</span>
+                                <div className="flex flex-col">
+                                  <span className="text-xs font-semibold text-light leading-none mb-1">{speaker.name}</span>
+                                  <span className="text-[10px] text-muted leading-none">{speaker.role} na {speaker.company}</span>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
-                      ))}
+                      )})}
                     </div>
                   </div>
                 ))}

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { useEvents } from "../../../context/EventContext";
 import { EVENT_THEMES, EVENT_TYPES } from "../../../types/Event";
+import type { AgendaItem } from "../../../types/Event";
 
 type Format = "online" | "presencial" | "hibrido";
 
@@ -29,6 +30,7 @@ export default function EditEventPage() {
   const [format, setFormat] = useState<Format>("presencial");
   const [theme, setTheme] = useState("");
   const [type, setType] = useState("");
+  const [agenda, setAgenda] = useState<AgendaItem[]>([]);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -58,6 +60,7 @@ export default function EditEventPage() {
         setFormat(eventToEdit.format);
         setTheme(eventToEdit.theme || "");
         setType(eventToEdit.type || "");
+        setAgenda(eventToEdit.agenda || []);
       }
       setLoading(false);
     }
@@ -81,6 +84,18 @@ export default function EditEventPage() {
       return;
     }
 
+    for (let i = 0; i < agenda.length; i++) {
+      const s = agenda[i];
+      if (!s.title.trim() || !s.description.trim() || !s.startTime || !s.endTime) {
+        setError(`Preenche todos os campos da sessão "${s.title || `Sessão ${i + 1}`}".`);
+        return;
+      }
+      if (s.startTime >= s.endTime) {
+        setError(`Na sessão "${s.title}", a hora de início deve ser anterior à hora de fim.`);
+        return;
+      }
+    }
+
     const res = updateEvent(eventId, { 
       title: title.trim(), 
       description: description.trim(), 
@@ -89,6 +104,7 @@ export default function EditEventPage() {
       format,
       theme: theme || undefined,
       type: type || undefined,
+      agenda: agenda.length > 0 ? agenda : undefined,
     });
     if (res.ok) {
       setSuccess("Evento atualizado com sucesso!");

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
 import { useEvents } from "../../context/EventContext";
 import { EVENT_THEMES, EVENT_TYPES } from "../../types/Event";
+import type { AgendaItem } from "../../types/Event";
 
 type Format = "online" | "presencial" | "hibrido";
 
@@ -27,6 +28,7 @@ export default function CreateEventPage() {
   const [format, setFormat] = useState<Format>("presencial");
   const [theme, setTheme] = useState("");
   const [type, setType] = useState("");
+  const [agenda, setAgenda] = useState<AgendaItem[]>([]);
   const [error, setError] = useState("");
 
   /* Redirect if not authenticated */
@@ -65,6 +67,18 @@ export default function CreateEventPage() {
       return;
     }
 
+    for (let i = 0; i < agenda.length; i++) {
+      const s = agenda[i];
+      if (!s.title.trim() || !s.description.trim() || !s.startTime || !s.endTime) {
+        setError(`Preenche todos os campos da sessão "${s.title || `Sessão ${i + 1}`}".`);
+        return;
+      }
+      if (s.startTime >= s.endTime) {
+        setError(`Na sessão "${s.title}", a hora de início deve ser anterior à hora de fim.`);
+        return;
+      }
+    }
+
     const result = createEvent({
       title: title.trim(),
       description: description.trim(),
@@ -73,6 +87,7 @@ export default function CreateEventPage() {
       format,
       theme: theme || undefined,
       type: type || undefined,
+      agenda: agenda.length > 0 ? agenda : undefined,
     });
 
     if (!result.ok) {
@@ -243,6 +258,80 @@ export default function CreateEventPage() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Agenda / Sessões */}
+            <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-soft/[0.12]">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-light tracking-wide">
+                  Agenda (Sessões)
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setAgenda([...agenda, { id: crypto.randomUUID(), title: "", description: "", startTime: "", endTime: "" }])}
+                  className="text-xs font-medium bg-soft/10 text-soft px-3 py-1.5 rounded-lg hover:bg-soft/20 transition-colors cursor-pointer"
+                >
+                  + Adicionar
+                </button>
+              </div>
+              
+              {agenda.length === 0 ? (
+                <div className="text-xs text-muted/60 bg-white/[0.02] p-4 rounded-xl border border-dashed border-soft/[0.15] text-center">
+                  Sem sessões planeadas. Clica em adicionar para começar.
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {agenda.map((item, index) => (
+                    <div key={item.id} className="flex flex-col gap-3 p-4 bg-white/[0.02] border border-soft/[0.12] rounded-xl relative">
+                      <button
+                        type="button"
+                        onClick={() => setAgenda(agenda.filter((s) => s.id !== item.id))}
+                        className="absolute top-3 right-3 text-muted hover:text-red-400 transition-colors text-xs cursor-pointer"
+                      >
+                        ✕ Remover
+                      </button>
+                      <div className="text-xs font-medium text-muted">Sessão {index + 1}</div>
+                      
+                      <input
+                        type="text"
+                        placeholder="Título da Sessão"
+                        value={item.title}
+                        onChange={(e) => setAgenda(agenda.map(a => a.id === item.id ? { ...a, title: e.target.value } : a))}
+                        className="w-full px-3 py-2 bg-white/[0.04] border border-soft/[0.15] rounded-lg text-light text-sm placeholder:text-muted/50 outline-none focus:border-soft/50 transition-colors"
+                      />
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] uppercase text-muted tracking-wider">Início</label>
+                          <input
+                            type="time"
+                            value={item.startTime}
+                            onChange={(e) => setAgenda(agenda.map(a => a.id === item.id ? { ...a, startTime: e.target.value } : a))}
+                            className="w-full px-3 py-2 bg-white/[0.04] border border-soft/[0.15] rounded-lg text-light text-sm outline-none focus:border-soft/50 transition-colors [color-scheme:dark]"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] uppercase text-muted tracking-wider">Fim</label>
+                          <input
+                            type="time"
+                            value={item.endTime}
+                            onChange={(e) => setAgenda(agenda.map(a => a.id === item.id ? { ...a, endTime: e.target.value } : a))}
+                            className="w-full px-3 py-2 bg-white/[0.04] border border-soft/[0.15] rounded-lg text-light text-sm outline-none focus:border-soft/50 transition-colors [color-scheme:dark]"
+                          />
+                        </div>
+                      </div>
+
+                      <textarea
+                        placeholder="Descrição da Sessão"
+                        value={item.description}
+                        onChange={(e) => setAgenda(agenda.map(a => a.id === item.id ? { ...a, description: e.target.value } : a))}
+                        rows={2}
+                        className="w-full px-3 py-2 bg-white/[0.04] border border-soft/[0.15] rounded-lg text-light text-sm placeholder:text-muted/50 outline-none focus:border-soft/50 transition-colors resize-none"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Submit */}

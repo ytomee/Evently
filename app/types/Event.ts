@@ -4,8 +4,11 @@ export const EVENT_THEMES = ["Tecnologia", "Arte", "Desporto", "Música", "Negó
 export const EVENT_TYPES = ["Conferência", "Workshop", "Meetup", "Webinar", "Festival", "Networking"];
 
 export interface AgendaItem {
-  time: string;
+  id: string;
   title: string;
+  description: string;
+  startTime: string;
+  endTime: string;
 }
 
 export interface Event {

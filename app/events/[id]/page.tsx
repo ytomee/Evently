@@ -131,9 +131,20 @@ export default function EventDetailsPage() {
             {event.agenda && event.agenda.length > 0 ? (
               <div className="flex flex-col gap-4">
                 {event.agenda.map((item, idx) => (
-                  <div key={idx} className="flex gap-4 p-4 rounded-xl bg-white/[0.02] border border-soft/[0.08]">
-                    <div className="text-soft font-mono text-sm shrink-0 mt-0.5">{item.time}</div>
-                    <div className="text-light font-medium">{item.title}</div>
+                  <div key={item.id || idx} className="flex gap-5 p-5 rounded-xl bg-white/[0.02] border border-soft/[0.08] hover:border-soft/20 transition-colors">
+                    <div className="flex flex-col items-center justify-start shrink-0 min-w-[4rem] pt-0.5">
+                      <span className="text-soft font-mono text-sm font-medium">{item.startTime}</span>
+                      <span className="text-muted/40 text-[10px] uppercase font-bold tracking-widest my-0.5">Até</span>
+                      <span className="text-muted font-mono text-xs">{item.endTime}</span>
+                    </div>
+                    <div className="flex flex-col gap-1 w-full border-l border-soft/[0.08] pl-5">
+                      <h4 className="text-light font-semibold text-base">{item.title}</h4>
+                      {item.description && (
+                        <p className="text-sm text-muted/80 leading-relaxed whitespace-pre-wrap mt-1">
+                          {item.description}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

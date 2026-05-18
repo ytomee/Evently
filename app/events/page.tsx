@@ -46,7 +46,6 @@ export default function EventsListPage() {
     return score;
   };
 
-  // Sort events by relevance score (desc) then by date descending
   const sortedEvents = [...events].sort((a, b) => {
     const scoreA = getRelevanceScore(a);
     const scoreB = getRelevanceScore(b);

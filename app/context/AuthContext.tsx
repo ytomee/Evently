@@ -48,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   /* Restore session on mount */
+  /* eslint-disable react-hooks/set-state-in-effect -- hydrating from localStorage on mount */
   useEffect(() => {
     try {
       const session = localStorage.getItem(SESSION_KEY);
@@ -60,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     }
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   /* Login */
   const login = useCallback((email: string, password: string) => {

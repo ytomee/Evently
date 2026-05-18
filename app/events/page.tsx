@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEvents } from "../context/EventContext";
 import { useAuth } from "../context/AuthContext";
+import type { Event } from "../types/Event";
 
 const FORMAT_BADGE: Record<string, { label: string; icon: string }> = {
   presencial: { label: "Presencial", icon: "📍" },
@@ -39,7 +40,7 @@ export default function EventsListPage() {
   const userThemes = user?.preferences?.themes || [];
   const userTypes = user?.preferences?.types || [];
 
-  const getRelevanceScore = (event: any) => {
+  const getRelevanceScore = (event: Event) => {
     let score = 0;
     if (event.theme && userThemes.includes(event.theme)) score += 1;
     if (event.type && userTypes.includes(event.type)) score += 1;

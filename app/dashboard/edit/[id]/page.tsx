@@ -36,13 +36,14 @@ export default function EditEventPage() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
 
-  /* Redirect if not authenticated */
-  if (!authLoading && !user) {
-    router.replace("/login");
-    return null;
-  }
-
+  /* Redirect if not authenticated & load event */
+  /* eslint-disable react-hooks/set-state-in-effect -- hydrating event data from context on mount */
   useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace("/login");
+      return;
+    }
+
     if (events.length > 0 && eventId && user) {
       const eventToEdit = events.find((e) => e.id === eventId);
       
@@ -64,7 +65,8 @@ export default function EditEventPage() {
       }
       setLoading(false);
     }
-  }, [events, eventId, user]);
+  }, [events, eventId, user, authLoading, router]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (authLoading || loading) {
     return (

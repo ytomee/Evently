@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEvents } from "../../context/EventContext";
 import { useAuth } from "../../context/AuthContext";
-import { MOCK_SPEAKERS } from "../../types/Event";
 import type { Event, EventStatus } from "../../types/Event";
 
 const FORMAT_BADGE: Record<string, { label: string; icon: string }> = {
@@ -48,6 +47,7 @@ export default function EventDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- hydrating from context */
   useEffect(() => {
     // Wait for context to load events from localStorage
     const found = events.find((e) => e.id === id);
@@ -58,6 +58,7 @@ export default function EventDetailsPage() {
     const timer = setTimeout(() => setLoading(false), 200);
     return () => clearTimeout(timer);
   }, [id, events]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (loading) {
     return (

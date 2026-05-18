@@ -52,6 +52,7 @@ export function EventProvider({ children }: { children: ReactNode }) {
   const [speakers, setSpeakers] = useState<Speaker[]>(MOCK_SPEAKERS);
 
   /* Load events from localStorage on mount */
+  /* eslint-disable react-hooks/set-state-in-effect -- hydrating from localStorage on mount */
   useEffect(() => {
     try {
       const raw = localStorage.getItem(EVENTS_KEY);
@@ -79,6 +80,7 @@ export function EventProvider({ children }: { children: ReactNode }) {
       console.error("Failed to load data from storage");
     }
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   /* Derived: events belonging to the authenticated user */
   const userEvents = events

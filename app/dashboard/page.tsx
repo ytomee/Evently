@@ -393,10 +393,10 @@ export default function DashboardPage() {
                         )}
                         {!isCancelled && (
                           <Link
-                            href={`/dashboard/checkin/${event.id}`}
+                            href={`/dashboard/participants/${event.id}`}
                             className="px-3 py-1.5 text-xs font-medium rounded-full border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 transition-colors"
                           >
-                            📝 Check-in
+                            👥 Participantes
                           </Link>
                         )}
                       </div>

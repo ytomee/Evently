@@ -20,6 +20,7 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState("");
 
   // Preenche o formulário com os dados do utilizador
+  /* eslint-disable react-hooks/set-state-in-effect -- syncing form fields with user context */
   useEffect(() => {
     if (user) {
       setName(user.name || "");
@@ -29,6 +30,7 @@ export default function ProfilePage() {
       setTypes(user.preferences?.types || []);
     }
   }, [user]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Redireciona se não estiver autenticado
   useEffect(() => {

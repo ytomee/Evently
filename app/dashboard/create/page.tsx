@@ -69,7 +69,7 @@ export default function CreateEventPage() {
 
     for (let i = 0; i < agenda.length; i++) {
       const s = agenda[i];
-      if (!s.title.trim() || !s.description.trim() || !s.startTime || !s.endTime) {
+      if (!s.title.trim() || !s.description.trim() || !s.date || !s.startTime || !s.endTime) {
         setError(`Preenche todos os campos da sessão "${s.title || `Sessão ${i + 1}`}".`);
         return;
       }
@@ -97,6 +97,22 @@ export default function CreateEventPage() {
 
     router.push("/dashboard");
   };
+
+  const hasOverlap = () => {
+    for (let i = 0; i < agenda.length; i++) {
+      for (let j = i + 1; j < agenda.length; j++) {
+        const a = agenda[i];
+        const b = agenda[j];
+        if (a.date && b.date && a.date === b.date) {
+          if (a.startTime < b.endTime && a.endTime > b.startTime) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+  const overlapping = hasOverlap();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -268,12 +284,18 @@ export default function CreateEventPage() {
                 </span>
                 <button
                   type="button"
-                  onClick={() => setAgenda([...agenda, { id: crypto.randomUUID(), title: "", description: "", startTime: "", endTime: "" }])}
+                  onClick={() => setAgenda([...agenda, { id: crypto.randomUUID(), date: date ? date.split("T")[0] : "", title: "", description: "", startTime: "", endTime: "" }])}
                   className="text-xs font-medium bg-soft/10 text-soft px-3 py-1.5 rounded-lg hover:bg-soft/20 transition-colors cursor-pointer"
                 >
                   + Adicionar
                 </button>
               </div>
+
+              {overlapping && (
+                <div className="flex items-center gap-2 px-4 py-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400 text-xs">
+                  <span>⚠️</span> Atenção: Existem sessões sobrepostas no mesmo dia.
+                </div>
+              )}
               
               {agenda.length === 0 ? (
                 <div className="text-xs text-muted/60 bg-white/[0.02] p-4 rounded-xl border border-dashed border-soft/[0.15] text-center">
@@ -299,6 +321,16 @@ export default function CreateEventPage() {
                         onChange={(e) => setAgenda(agenda.map(a => a.id === item.id ? { ...a, title: e.target.value } : a))}
                         className="w-full px-3 py-2 bg-white/[0.04] border border-soft/[0.15] rounded-lg text-light text-sm placeholder:text-muted/50 outline-none focus:border-soft/50 transition-colors"
                       />
+                      
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] uppercase text-muted tracking-wider">Data</label>
+                        <input
+                          type="date"
+                          value={item.date || ""}
+                          onChange={(e) => setAgenda(agenda.map(a => a.id === item.id ? { ...a, date: e.target.value } : a))}
+                          className="w-full px-3 py-2 bg-white/[0.04] border border-soft/[0.15] rounded-lg text-light text-sm outline-none focus:border-soft/50 transition-colors [color-scheme:dark]"
+                        />
+                      </div>
                       
                       <div className="grid grid-cols-2 gap-3">
                         <div className="flex flex-col gap-1">

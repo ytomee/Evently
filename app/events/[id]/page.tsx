@@ -84,6 +84,40 @@ export default function EventDetailsPage() {
     alert("Funcionalidade de inscrição em breve!");
   };
 
+  const sortedAgenda = [...(event.agenda || [])].sort((a, b) => {
+    if (a.date !== b.date) return (a.date || "").localeCompare(b.date || "");
+    return a.startTime.localeCompare(b.startTime);
+  });
+
+  const groupedAgenda = sortedAgenda.reduce((acc, item) => {
+    const d = item.date || "Sem data";
+    if (!acc[d]) acc[d] = [];
+    acc[d].push(item);
+    return acc;
+  }, {} as Record<string, typeof event.agenda>);
+
+  const formatGroupDate = (d: string) => {
+    if (d === "Sem data") return d;
+    try {
+      const parts = d.split('-');
+      if (parts.length === 3) {
+        const dateObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        return dateObj.toLocaleDateString("pt-PT", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+        });
+      }
+      return new Date(d).toLocaleDateString("pt-PT", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      });
+    } catch {
+      return d;
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Navbar */}
@@ -129,21 +163,30 @@ export default function EventDetailsPage() {
           <div>
             <h2 className="text-xl font-bold text-light mb-6">Agenda</h2>
             {event.agenda && event.agenda.length > 0 ? (
-              <div className="flex flex-col gap-4">
-                {event.agenda.map((item, idx) => (
-                  <div key={item.id || idx} className="flex gap-5 p-5 rounded-xl bg-white/[0.02] border border-soft/[0.08] hover:border-soft/20 transition-colors">
-                    <div className="flex flex-col items-center justify-start shrink-0 min-w-[4rem] pt-0.5">
-                      <span className="text-soft font-mono text-sm font-medium">{item.startTime}</span>
-                      <span className="text-muted/40 text-[10px] uppercase font-bold tracking-widest my-0.5">Até</span>
-                      <span className="text-muted font-mono text-xs">{item.endTime}</span>
-                    </div>
-                    <div className="flex flex-col gap-1 w-full border-l border-soft/[0.08] pl-5">
-                      <h4 className="text-light font-semibold text-base">{item.title}</h4>
-                      {item.description && (
-                        <p className="text-sm text-muted/80 leading-relaxed whitespace-pre-wrap mt-1">
-                          {item.description}
-                        </p>
-                      )}
+              <div className="flex flex-col gap-8">
+                {Object.entries(groupedAgenda).map(([dateStr, items]) => (
+                  <div key={dateStr} className="flex flex-col gap-4">
+                    <h3 className="text-sm font-semibold text-soft tracking-wide uppercase border-b border-soft/[0.1] pb-2 capitalize">
+                      {formatGroupDate(dateStr)}
+                    </h3>
+                    <div className="flex flex-col gap-4">
+                      {items!.map((item, idx) => (
+                        <div key={item.id || idx} className="flex gap-5 p-5 rounded-xl bg-white/[0.02] border border-soft/[0.08] hover:border-soft/20 transition-colors">
+                          <div className="flex flex-col items-center justify-start shrink-0 min-w-[4rem] pt-0.5">
+                            <span className="text-soft font-mono text-sm font-medium">{item.startTime}</span>
+                            <span className="text-muted/40 text-[10px] uppercase font-bold tracking-widest my-0.5">Até</span>
+                            <span className="text-muted font-mono text-xs">{item.endTime}</span>
+                          </div>
+                          <div className="flex flex-col gap-1 w-full border-l border-soft/[0.08] pl-5">
+                            <h4 className="text-light font-semibold text-base">{item.title}</h4>
+                            {item.description && (
+                              <p className="text-sm text-muted/80 leading-relaxed whitespace-pre-wrap mt-1">
+                                {item.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}

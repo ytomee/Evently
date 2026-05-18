@@ -5,6 +5,7 @@ export const EVENT_TYPES = ["Conferência", "Workshop", "Meetup", "Webinar", "Fe
 
 export interface AgendaItem {
   id: string;
+  date: string;
   title: string;
   description: string;
   startTime: string;

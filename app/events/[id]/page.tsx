@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEvents } from "../../context/EventContext";
+import { useAuth } from "../../context/AuthContext";
+import { MOCK_SPEAKERS } from "../../types/Event";
 import type { Event, EventStatus } from "../../types/Event";
 
 const FORMAT_BADGE: Record<string, { label: string; icon: string }> = {
@@ -39,6 +41,8 @@ export default function EventDetailsPage() {
   const { id } = useParams();
   const { events, speakers } = useEvents();
   const router = useRouter();
+  
+  const { user, updateUser } = useAuth();
   
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,9 +83,19 @@ export default function EventDetailsPage() {
   
   const isCancelled = event.status === "cancelado";
   const isActive = event.status === "ativo";
+  const isPlanned = event.status === "planeado";
+
+  const isRegistered = user?.registeredEvents?.includes(event.id) ?? false;
 
   const handleRegister = () => {
-    alert("Funcionalidade de inscrição em breve!");
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    if (isRegistered) return;
+
+    const updatedEvents = [...(user.registeredEvents || []), event.id];
+    updateUser({ registeredEvents: updatedEvents });
   };
 
   const sortedAgenda = [...(event.agenda || [])].sort((a, b) => {
@@ -239,7 +253,11 @@ export default function EventDetailsPage() {
               </div>
             </div>
 
-            {isActive ? (
+            {isRegistered ? (
+              <button disabled className="w-full py-3.5 bg-emerald-500/20 text-emerald-400 font-bold text-sm rounded-xl cursor-default border border-emerald-500/30 flex items-center justify-center gap-2">
+                <span>✔</span> Inscrito
+              </button>
+            ) : isActive || isPlanned ? (
               <button onClick={handleRegister} className="w-full py-3.5 bg-soft text-dark font-semibold text-sm rounded-xl transition-all duration-200 hover:bg-light hover:-translate-y-px cursor-pointer shadow-lg shadow-soft/20">
                 Inscrever-me
               </button>
@@ -253,7 +271,7 @@ export default function EventDetailsPage() {
               </div>
             ) : (
               <div className="w-full py-3.5 bg-white/[0.05] text-muted font-semibold text-sm rounded-xl text-center border border-soft/10">
-                Inscrições em breve
+                Inscrições fechadas
               </div>
             )}
           </div>

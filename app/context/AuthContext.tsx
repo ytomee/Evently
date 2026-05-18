@@ -13,6 +13,7 @@ interface User {
     themes: string[];
     types: string[];
   };
+  registeredEvents?: string[];
 }
 
 interface AuthContextType {

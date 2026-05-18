@@ -74,7 +74,7 @@ function formatDate(iso: string) {
 
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
-  const { userEvents, updateEventStatus } = useEvents();
+  const { events, userEvents, updateEventStatus } = useEvents();
   const router = useRouter();
 
   /* Track which card has the status dropdown open */
@@ -127,6 +127,10 @@ export default function DashboardPage() {
     setTimeout(() => setFeedback(null), 3000);
   };
 
+  const registeredEventsList = events
+    .filter((e) => user.registeredEvents?.includes(e.id))
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
   return (
     <div className="min-h-screen flex flex-col">
 
@@ -153,36 +157,101 @@ export default function DashboardPage() {
       </nav>
 
       {/* Content */}
-      <main className="flex-1 px-6 sm:px-10 py-10 sm:py-14 max-w-4xl mx-auto w-full">
+      <main className="flex-1 px-6 sm:px-10 py-10 sm:py-14 max-w-4xl mx-auto w-full flex flex-col gap-16">
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-10">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-light mb-1">
-              Os meus eventos
-            </h1>
+        {/* --- As minhas inscrições --- */}
+        <div>
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold tracking-tight text-light mb-1">
+              As minhas inscrições
+            </h2>
             <p className="text-sm text-muted">
-              Gere e acompanha os eventos que criaste.
+              Eventos em que te registaste para participar.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard/speakers"
-              className="px-6 py-2.5 bg-white/[0.04] border border-soft/[0.15] text-light font-semibold text-sm rounded-full transition-all duration-200 hover:bg-white/[0.08]"
-            >
-              👤 Meus oradores
-            </Link>
-            <Link
-              id="new-event-btn"
-              href="/dashboard/create"
-              className="px-6 py-2.5 bg-soft text-dark font-semibold text-sm rounded-full transition-all duration-200 hover:bg-light hover:-translate-y-px whitespace-nowrap"
-            >
-              + Criar evento
-            </Link>
-          </div>
+
+          {registeredEventsList.length === 0 ? (
+            <div className="py-12 text-center rounded-2xl border border-dashed border-soft/20 bg-white/[0.01]">
+              <p className="text-muted text-sm">Ainda não te inscreveste em nenhum evento.</p>
+              <Link href="/" className="inline-block mt-4 text-soft text-sm hover:underline">
+                Explorar eventos
+              </Link>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {registeredEventsList.map((event) => {
+                const fmtBadge = FORMAT_BADGE[event.format] ?? { label: event.format, icon: "📌" };
+                const status = STATUS_CONFIG[event.status] ?? STATUS_CONFIG.planeado;
+
+                return (
+                  <Link
+                    key={`reg-${event.id}`}
+                    href={`/events/${event.id}`}
+                    className="group block rounded-2xl p-5 sm:p-6 backdrop-blur-md border border-soft/[0.12] bg-emerald-500/[0.02] hover:bg-emerald-500/[0.05] hover:border-emerald-500/30 transition-all duration-200"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-base font-semibold text-light truncate group-hover:text-emerald-400 transition-colors">
+                            {event.title}
+                          </h3>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            ✔ Inscrito
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted mt-2">
+                          <span>📅 {formatDate(event.date)}</span>
+                          <span>📍 {event.location}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${status.bg} ${status.border} ${status.text}`}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                          {status.label}
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-soft/10 border border-soft/20 text-xs font-medium text-soft">
+                          {fmtBadge.icon} {fmtBadge.label}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Events list */}
+        {/* --- Os meus eventos (Organizados) --- */}
+        <div>
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight text-light mb-1">
+                Os meus eventos
+              </h2>
+              <p className="text-sm text-muted">
+                Gere e acompanha os eventos que criaste.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/dashboard/speakers"
+                className="px-6 py-2.5 bg-white/[0.04] border border-soft/[0.15] text-light font-semibold text-sm rounded-full transition-all duration-200 hover:bg-white/[0.08]"
+              >
+                👤 Meus oradores
+              </Link>
+              <Link
+                id="new-event-btn"
+                href="/dashboard/create"
+                className="px-6 py-2.5 bg-soft text-dark font-semibold text-sm rounded-full transition-all duration-200 hover:bg-light hover:-translate-y-px whitespace-nowrap"
+              >
+                + Criar evento
+              </Link>
+            </div>
+          </div>
+
+          {/* Events list */}
         {userEvents.length === 0 ? (
           /* Empty state */
           <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -334,6 +403,7 @@ export default function DashboardPage() {
             })}
           </div>
         )}
+        </div>
       </main>
     </div>
   );
